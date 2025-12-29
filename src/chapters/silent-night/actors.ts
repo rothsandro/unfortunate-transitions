@@ -1,12 +1,69 @@
-import { createMachine, log, sendTo, setup } from 'xstate';
+import { assign, createMachine, fromCallback, log, sendTo, setup } from 'xstate';
+import type { ActorRefFromLogic } from 'xstate';
 
-const alarmClock = createMachine({
+const time = setup({
+  types: {
+    context: {} as { virtualTime: number },
+  },
+  actors: {
+    ticker: fromCallback<{ type: 'tick' }>(({ sendBack }) => {
+      const id = setInterval(() => sendBack({ type: 'tick' }), 1000);
+      return () => clearInterval(id);
+    }),
+  },
+  actions: {
+    advanceTime: assign({
+      virtualTime: ({ context }) => {
+        const next = context.virtualTime + 10;
+        const max = 24 * 60;
+        return next >= max ? next - max : next;
+      },
+    }),
+  },
+}).createMachine({
+  id: 'timer',
+  context: { virtualTime: 17 * 60 },
+  invoke: { src: 'ticker' },
+  on: {
+    tick: { actions: 'advanceTime' },
+  },
+});
+
+const timeListener = fromCallback<{ type: 'time.update'; virtualTime: number }>(
+  ({ sendBack, system }) => {
+    const timeActorRef = system.get('time') as ActorRefFromLogic<typeof time>;
+    const subscription = timeActorRef.subscribe((snapshot) => {
+      sendBack({ type: 'time.update', virtualTime: snapshot.context.virtualTime });
+    });
+    return () => subscription.unsubscribe();
+  },
+);
+
+const alarmClock = setup({
+  types: {
+    context: {} as {
+      virtualTime: number;
+    },
+  },
+  actors: { timeListener },
+}).createMachine({
   id: 'alarmClock',
+  context: { virtualTime: -1 },
+  invoke: { src: 'timeListener' },
   initial: 'armed',
+  on: {
+    'time.update': {
+      actions: assign({ virtualTime: ({ event }) => event.virtualTime }),
+    },
+  },
   states: {
     armed: {
       on: {
         trigger: 'ringing',
+      },
+      always: {
+        guard: ({ context }) => context.virtualTime === 18 * 60,
+        target: 'ringing',
       },
     },
     ringing: {
@@ -73,15 +130,20 @@ const human = createMachine({
   },
 });
 
-const poltergeist = createMachine({
+const poltergeist = setup({
+  actors: { timeListener },
+}).createMachine({
   id: 'poltergeist',
   initial: 'mischievous',
-  states: {
-    mischievous: {
-      after: {
-        10_000: 'failed',
-      },
+  invoke: { src: 'timeListener' },
+  on: {
+    'time.update': {
+      guard: ({ event }) => event.virtualTime === 0,
+      target: '.failed',
     },
+  },
+  states: {
+    mischievous: {},
     failed: {
       type: 'final',
     },
@@ -91,19 +153,25 @@ const poltergeist = createMachine({
 export const rootMachine = setup({
   types: {
     children: {} as {
+      time: 'time';
       alarmClock: 'alarmClock';
       cat: 'cat';
       human: 'human';
       poltergeist: 'poltergeist';
     },
   },
-  actors: { alarmClock, cat, human, poltergeist },
+  actors: { time, alarmClock, cat, human, poltergeist },
 }).createMachine({
   id: 'silentNight',
   initial: 'playing',
   states: {
     playing: {
       invoke: [
+        {
+          id: 'time',
+          systemId: 'time',
+          src: 'time',
+        },
         {
           id: 'alarmClock',
           systemId: 'alarmClock',

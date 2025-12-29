@@ -33,13 +33,14 @@ function App() {
         </div>
       )}
       {!state.isDone && (
-        <div className="flex gap-6">
-          <silentNight.context value={actorRef}>
+        <silentNight.context value={actorRef}>
+          <silentNight.details />
+          <div className="flex gap-6">
             {Object.entries(silentNight.cards).map(([key, Card]) => (
               <Card key={key} />
             ))}
-          </silentNight.context>
-        </div>
+          </div>
+        </silentNight.context>
       )}
       <div className="space-y-2 border p-2 font-mono">
         {logs.length === 0 && <div className="text-slate-500">No logs yet</div>}
