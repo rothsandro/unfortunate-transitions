@@ -13,17 +13,26 @@ function App() {
     },
   });
 
-  const hasWon = useSelector(actorRef, (x) => x.matches('won'));
+  const state = useSelector(actorRef, (x) => ({
+    isDone: x.status === 'done',
+    hasWon: x.matches('won'),
+    hasLost: x.matches('lost'),
+  }));
 
   return (
     <main className="space-y-4">
       <h1 className="text-3xl font-bold">Unfortunate Transitions</h1>
-      {!!hasWon && (
+      {!!state.hasWon && (
         <div className="rounded bg-green-100 p-4 font-bold text-green-800">
           Human is dead, you won!
         </div>
       )}
-      {!hasWon && (
+      {!!state.hasLost && (
+        <div className="rounded bg-red-100 p-4 font-bold text-red-800">
+          The human survived, you lost!
+        </div>
+      )}
+      {!state.isDone && (
         <div className="flex gap-6">
           <silentNight.context value={actorRef}>
             {Object.entries(silentNight.cards).map(([key, Card]) => (

@@ -22,29 +22,6 @@ const alarmClock = createMachine({
   },
 });
 
-const human = createMachine({
-  id: 'human',
-  initial: 'sleeping',
-  states: {
-    sleeping: {
-      on: {
-        loudNoise: 'awake',
-        getsBitten: 'dead',
-      },
-    },
-    awake: {
-      on: {
-        getsBitten: {
-          actions: log('Ouch, Johnny bit me!'),
-        },
-      },
-    },
-    dead: {
-      type: 'final',
-    },
-  },
-});
-
 const cat = createMachine({
   id: 'cat',
   initial: 'sleeping',
@@ -73,15 +50,54 @@ const cat = createMachine({
   },
 });
 
+const human = createMachine({
+  id: 'human',
+  initial: 'sleeping',
+  states: {
+    sleeping: {
+      on: {
+        loudNoise: 'awake',
+        getsBitten: 'dead',
+      },
+    },
+    awake: {
+      on: {
+        getsBitten: {
+          actions: log('Ouch, Johnny bit me!'),
+        },
+      },
+    },
+    dead: {
+      type: 'final',
+    },
+  },
+});
+
+const poltergeist = createMachine({
+  id: 'poltergeist',
+  initial: 'mischievous',
+  states: {
+    mischievous: {
+      after: {
+        10_000: 'failed',
+      },
+    },
+    failed: {
+      type: 'final',
+    },
+  },
+});
+
 export const rootMachine = setup({
   types: {
     children: {} as {
       alarmClock: 'alarmClock';
       cat: 'cat';
       human: 'human';
+      poltergeist: 'poltergeist';
     },
   },
-  actors: { alarmClock, cat, human },
+  actors: { alarmClock, cat, human, poltergeist },
 }).createMachine({
   id: 'silentNight',
   initial: 'playing',
@@ -94,19 +110,28 @@ export const rootMachine = setup({
           src: 'alarmClock',
         },
         {
+          id: 'cat',
+          systemId: 'cat',
+          src: 'cat',
+        },
+        {
           id: 'human',
           systemId: 'human',
           src: 'human',
           onDone: 'won',
         },
         {
-          id: 'cat',
-          systemId: 'cat',
-          src: 'cat',
+          id: 'poltergeist',
+          systemId: 'poltergeist',
+          src: 'poltergeist',
+          onDone: 'lost',
         },
       ],
     },
     won: {
+      type: 'final',
+    },
+    lost: {
       type: 'final',
     },
   },

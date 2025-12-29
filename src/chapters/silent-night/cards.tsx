@@ -67,3 +67,19 @@ export function CatCard() {
     </div>
   );
 }
+
+export function PoltergeistCard() {
+  const rootRef = useRootActor();
+  const childRef = useSelector(rootRef, (x) => x.children.poltergeist!);
+  const state = useSelector(childRef, (x) => ({ value: x.value }));
+
+  return (
+    <div className="border">
+      <div aria-hidden="true" className="text-7xl">
+        👻
+      </div>
+      <h3 className="text-3xl">Poltergeist (You)</h3>
+      <p>{String(state.value).replace(/^./, (char) => char.toUpperCase())}</p>
+    </div>
+  );
+}
