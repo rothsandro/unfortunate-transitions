@@ -45,7 +45,12 @@ export function HumanCard() {
 export function CatCard() {
   const rootRef = useRootActor();
   const childRef = useSelector(rootRef, (x) => x.children.cat!);
-  const state = useSelector(childRef, (x) => x.value);
+  const state = useSelector(childRef, (x) => ({
+    value: x.value,
+    canNudge: x.can({ type: 'nudge' }),
+  }));
+
+  const onNudge = () => childRef.send({ type: 'nudge' });
 
   return (
     <div className="border">
@@ -53,7 +58,12 @@ export function CatCard() {
         😼
       </div>
       <h3 className="text-3xl">Cat</h3>
-      <p>{String(state).replace(/^./, (char) => char.toUpperCase())}</p>
+      <p>{String(state.value).replace(/^./, (char) => char.toUpperCase())}</p>
+      {!!state.canNudge && (
+        <button type="button" onClick={onNudge}>
+          Nudge
+        </button>
+      )}
     </div>
   );
 }
