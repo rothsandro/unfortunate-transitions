@@ -1,18 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useActorRef, useSelector } from '@xstate/react';
-import { useState } from 'react';
 import { silentNight } from '@/chapters/silent-night';
 
 export const Route = createFileRoute('/')({ component: App });
 
 function App() {
-  const [logs, setLogs] = useState<Array<string>>([]);
-  const actorRef = useActorRef(silentNight.machine, {
-    logger: (message: string) => {
-      setLogs((prev) => [message, ...prev]);
-    },
-  });
-
+  const actorRef = useActorRef(silentNight.machine);
   const state = useSelector(actorRef, (x) => ({
     isDone: x.status === 'done',
     hasWon: x.matches('won'),
@@ -42,12 +35,6 @@ function App() {
           </div>
         </silentNight.context>
       )}
-      <div className="space-y-2 border p-2 font-mono">
-        {logs.length === 0 && <div className="text-slate-500">No logs yet</div>}
-        {logs.map((log, index) => (
-          <div key={index}>{log}</div>
-        ))}
-      </div>
       <pre className="h-72 overflow-auto border">{silentNight.code}</pre>
     </main>
   );

@@ -7,10 +7,15 @@ export const Details = () => {
 
   if (isDone) return null;
 
-  return <Time />;
+  return (
+    <>
+      <Time />
+      <Logs />
+    </>
+  );
 };
 
-const Time = () => {
+function Time() {
   const actorRef = useRootActor();
   const timeActor = useSelector(actorRef, (x) => x.children.time!);
   const timeState = useSelector(timeActor, (x) => x.context.virtualTime);
@@ -22,4 +27,19 @@ const Time = () => {
       Time: {hours}:{minutes}
     </div>
   );
-};
+}
+
+function Logs() {
+  const actorRef = useRootActor();
+  const loggerActor = useSelector(actorRef, (x) => x.children.logger!);
+  const logs = useSelector(loggerActor, (x) => x.context.logs);
+
+  return (
+    <div className="space-y-2 border p-2 font-mono">
+      {logs.length === 0 && <div className="text-slate-500">No logs yet</div>}
+      {logs.map((log, index) => (
+        <div key={index}>{log}</div>
+      ))}
+    </div>
+  );
+}

@@ -1,5 +1,31 @@
-import { assign, createMachine, fromCallback, log, sendTo, setup } from 'xstate';
-import type { ActorRefFromLogic } from 'xstate';
+import { assign, createMachine, fromCallback, sendTo, setup } from 'xstate';
+import type { ActionFunction, ActorRefFromLogic } from 'xstate';
+
+type AnyActionFunction = ActionFunction<any, any, any, any, any, any, any, any, any>;
+const log =
+  (message: string): AnyActionFunction =>
+  ({ system }) => {
+    const loggerActorRef = system.get('logger') as ActorRefFromLogic<typeof logger> | undefined;
+    loggerActorRef?.send({ type: 'log', message });
+  };
+
+const logger = setup({
+  types: {
+    context: {} as {
+      logs: Array<string>;
+    },
+  },
+}).createMachine({
+  id: 'logger',
+  context: { logs: [] },
+  on: {
+    log: {
+      actions: assign({
+        logs: ({ context, event }) => [event.message, ...context.logs],
+      }),
+    },
+  },
+});
 
 const time = setup({
   types: {
@@ -153,6 +179,7 @@ const poltergeist = setup({
 export const rootMachine = setup({
   types: {
     children: {} as {
+      logger: 'logger';
       time: 'time';
       alarmClock: 'alarmClock';
       cat: 'cat';
@@ -160,13 +187,18 @@ export const rootMachine = setup({
       poltergeist: 'poltergeist';
     },
   },
-  actors: { time, alarmClock, cat, human, poltergeist },
+  actors: { logger, time, alarmClock, cat, human, poltergeist },
 }).createMachine({
   id: 'silentNight',
   initial: 'playing',
   states: {
     playing: {
       invoke: [
+        {
+          id: 'logger',
+          systemId: 'logger',
+          src: 'logger',
+        },
         {
           id: 'time',
           systemId: 'time',
