@@ -1,45 +1,25 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { useActorRef, useSelector } from '@xstate/react';
+import { RefreshCcw } from 'lucide-react';
+import clsx from 'clsx';
 import { silentNight } from '@/chapters/silent-night';
 import { Tab, TabList, TabPanel, Tabs } from '@/ui/tabs';
 import { BackButton } from '@/ui/back-button';
+import { useSafeContext } from '@/lib/context';
 
 export const Route = createFileRoute('/chapters/silent-night')({ component: RouteComponent });
 
 function RouteComponent() {
   const actorRef = useActorRef(silentNight.machine);
-  const state = useSelector(actorRef, (x) => ({
-    isDone: x.status === 'done',
-    hasWon: x.matches('won'),
-    hasLost: x.matches('lost'),
-  }));
 
   return (
     <silentNight.context value={actorRef}>
       <div className="grid h-screen grid-cols-[400px_minmax(0,1fr)] grid-rows-1">
         <Sidepanel />
         <main className="relative grid h-full grid-rows-[minmax(0,4fr)_minmax(0,3fr)] overflow-clip">
-          {!!state.hasWon && (
-            <div className="p-8">
-              <div className="rounded bg-green-950 p-4 font-bold text-green-100">
-                Human is dead, you won!
-              </div>
-            </div>
-          )}
-          {!!state.hasLost && (
-            <div className="p-8">
-              <div className="rounded bg-red-950 p-4 font-bold text-red-100">
-                The human survived, you lost!
-              </div>
-            </div>
-          )}
-          {!state.isDone && (
-            <>
-              <silentNight.Time />
-              <ActorCards />
-              <Drawer />
-            </>
-          )}
+          <silentNight.Time />
+          <ActorCards />
+          <Drawer />
         </main>
       </div>
     </silentNight.context>
@@ -47,18 +27,72 @@ function RouteComponent() {
 }
 
 function Sidepanel() {
+  const actorRef = useSafeContext(silentNight.context);
+  const state = useSelector(actorRef, (x) => ({
+    isDone: x.status === 'done',
+    hasWon: x.matches('won'),
+    hasLost: x.matches('lost'),
+  }));
+
   return (
-    <aside className="overflow-auto p-8">
+    <aside
+      className={clsx(
+        'overflow-auto p-8',
+        !!state.hasWon && 'border-r border-emerald-950 bg-emerald-950/40',
+        !!state.hasLost && 'border-r border-red-950 bg-red-950/30',
+      )}
+    >
       <BackButton />
-      <h1 className="mt-12">
-        <span className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
-          {silentNight.chapter}
-        </span>
-        <span className="block font-spooky text-3xl">{silentNight.title}</span>
-      </h1>
-      <hr className="my-6 border-slate-800" />
-      <div className="font-serif text-lg text-slate-400 italic">{silentNight.intro}</div>
+
+      {!!state.hasWon && <ChapterCompleteMessage />}
+      {!!state.hasLost && <ChapterFailedMessage />}
+      {!state.isDone && (
+        <>
+          <h1 className="mt-12">
+            <span className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
+              {silentNight.chapter}
+            </span>
+            <span className="block font-spooky text-3xl">{silentNight.title}</span>
+          </h1>
+          <hr className="my-6 border-slate-800" />
+          <div className="font-serif text-lg text-slate-400 italic">{silentNight.intro}</div>
+        </>
+      )}
     </aside>
+  );
+}
+
+function ChapterCompleteMessage() {
+  return (
+    <div className="mt-12">
+      <div className="text-7xl">💀</div>
+      <h1 className="mt-6 text-4xl font-semibold text-emerald-500">Chapter Complete!</h1>
+      <p className="mt-4 text-lg">No witnesses, no evidence, no pulse. Perfect.</p>
+      <Link
+        to="."
+        className="mt-6 flex items-center justify-center gap-2 rounded bg-slate-800 p-3 text-white"
+        reloadDocument
+      >
+        <RefreshCcw size={20} /> Restart Chapter
+      </Link>
+    </div>
+  );
+}
+
+function ChapterFailedMessage() {
+  return (
+    <div className="mt-12">
+      <div className="text-7xl">🙃</div>
+      <h1 className="mt-6 text-4xl font-semibold text-red-500">A Happy Ending</h1>
+      <p className="mt-4 text-lg">For them. You're still dead and now also disappointed.</p>
+      <Link
+        to="."
+        className="mt-6 flex items-center justify-center gap-2 rounded bg-red-600 p-3 text-white"
+        reloadDocument
+      >
+        <RefreshCcw size={20} /> Try Again
+      </Link>
+    </div>
   );
 }
 

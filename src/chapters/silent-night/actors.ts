@@ -204,48 +204,43 @@ export const rootMachine = setup({
 }).createMachine({
   id: 'silentNight',
   initial: 'playing',
+  invoke: [
+    {
+      id: 'logger',
+      systemId: 'logger',
+      src: 'logger',
+    },
+    {
+      id: 'time',
+      systemId: 'time',
+      src: 'time',
+    },
+    {
+      id: 'alarmClock',
+      systemId: 'alarmClock',
+      src: 'alarmClock',
+    },
+    {
+      id: 'cat',
+      systemId: 'cat',
+      src: 'cat',
+    },
+    {
+      id: 'human',
+      systemId: 'human',
+      src: 'human',
+      onDone: '.won',
+    },
+    {
+      id: 'poltergeist',
+      systemId: 'poltergeist',
+      src: 'poltergeist',
+      onDone: '.lost',
+    },
+  ],
   states: {
-    playing: {
-      invoke: [
-        {
-          id: 'logger',
-          systemId: 'logger',
-          src: 'logger',
-        },
-        {
-          id: 'time',
-          systemId: 'time',
-          src: 'time',
-        },
-        {
-          id: 'alarmClock',
-          systemId: 'alarmClock',
-          src: 'alarmClock',
-        },
-        {
-          id: 'cat',
-          systemId: 'cat',
-          src: 'cat',
-        },
-        {
-          id: 'human',
-          systemId: 'human',
-          src: 'human',
-          onDone: 'won',
-        },
-        {
-          id: 'poltergeist',
-          systemId: 'poltergeist',
-          src: 'poltergeist',
-          onDone: 'lost',
-        },
-      ],
-    },
-    won: {
-      type: 'final',
-    },
-    lost: {
-      type: 'final',
-    },
+    playing: {},
+    won: { type: 'final' },
+    lost: { type: 'final' },
   },
 });
