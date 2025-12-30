@@ -1,41 +1,77 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useActorRef, useSelector } from '@xstate/react';
-import { silentNight } from '@/chapters/silent-night';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { ArrowRight } from 'lucide-react';
+import type { PropsWithChildren } from 'react';
 
-export const Route = createFileRoute('/')({ component: App });
+export const Route = createFileRoute('/')({
+  component: RouteComponent,
+});
 
-function App() {
-  const actorRef = useActorRef(silentNight.machine);
-  const state = useSelector(actorRef, (x) => ({
-    isDone: x.status === 'done',
-    hasWon: x.matches('won'),
-    hasLost: x.matches('lost'),
-  }));
+function RouteComponent() {
+  return (
+    <>
+      <Ghosts />
+      <Container>
+        <h1
+          className="max-w-[12ch] bg-linear-to-b from-slate-50 to-slate-300 bg-clip-text font-spooky
+            text-8xl text-transparent"
+        >
+          Unfortunate Transitions
+        </h1>
+        <p className="mt-12 font-serif text-3xl leading-tight font-medium italic">
+          State by state, <span className="text-accent not-italic">seal their fate.</span>
+        </p>
+        <p
+          className="mt-12 inline-flex items-center gap-2 rounded border border-slate-600 px-2 py-1
+            font-mono text-accent"
+        >
+          <ArrowRight size={20} /> Chapter I: Silent Night
+        </p>
+        <div className="mt-16">
+          <Link
+            to="/chapters/silent-night"
+            className="rounded bg-white px-8 py-4 font-serif text-2xl text-black"
+          >
+            Play Now
+          </Link>
+        </div>
+      </Container>
+    </>
+  );
+}
+
+function Container(props: PropsWithChildren) {
+  const { children } = props;
 
   return (
-    <main className="space-y-4">
-      <h1 className="text-3xl font-bold">Unfortunate Transitions</h1>
-      {!!state.hasWon && (
-        <div className="rounded bg-green-100 p-4 font-bold text-green-800">
-          Human is dead, you won!
+    <div
+      className="relative flex min-h-screen items-center p-12 before:pointer-events-none
+        before:absolute before:inset-0 before:-z-10 before:block
+        before:bg-[radial-gradient(circle_at_20%_30%,rgba(125,211,252,0.15)_0%,transparent_40%),radial-gradient(circle_at_80%_70%,rgba(244,114,182,0.08)_0%,transparent_35%)]
+        before:content-['']"
+    >
+      <main className="mx-auto text-center">{children}</main>
+    </div>
+  );
+}
+
+function Ghosts() {
+  const ghosts = [
+    'top-[15%] left-[12%] text-8xl opacity-[0.12]',
+    'right-[15%] bottom-[20%] text-7xl opacity-[0.08] [animation-delay:-3s]',
+    'top-[60%] left-[8%] text-5xl opacity-[0.06] [animation-delay:-2s]',
+  ];
+
+  return (
+    <>
+      {ghosts.map((className) => (
+        <div
+          key={className}
+          className={'pointer-events-none absolute animate-float select-none ' + className}
+          aria-hidden="true"
+        >
+          👻
         </div>
-      )}
-      {!!state.hasLost && (
-        <div className="rounded bg-red-100 p-4 font-bold text-red-800">
-          The human survived, you lost!
-        </div>
-      )}
-      {!state.isDone && (
-        <silentNight.context value={actorRef}>
-          <silentNight.details />
-          <div className="flex gap-6">
-            {Object.entries(silentNight.cards).map(([key, Card]) => (
-              <Card key={key} />
-            ))}
-          </div>
-        </silentNight.context>
-      )}
-      <pre className="h-72 overflow-auto border">{silentNight.code}</pre>
-    </main>
+      ))}
+    </>
   );
 }

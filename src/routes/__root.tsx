@@ -34,7 +34,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-slate-950 text-slate-100">
         {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}

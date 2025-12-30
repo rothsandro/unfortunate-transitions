@@ -1,1 +1,24 @@
+@import '@fontsource/creepster';
+@import '@fontsource-variable/crimson-pro';
+@import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
+
+@theme {
+  --font-spooky: 'Creepster', system-ui;
+  --font-serif: 'Crimson Pro Variable', serif;
+  --font-mono: 'JetBrains Mono Variable', monospace;
+
+  --color-accent: #7dd3fc;
+
+  --animate-float: float 8s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-5deg);
+    }
+    50% {
+      transform: translateY(-20px) rotate(5deg);
+    }
+  }
+}
