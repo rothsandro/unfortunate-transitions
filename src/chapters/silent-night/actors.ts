@@ -7,13 +7,30 @@ const log =
   (message: string): AnyActionFunction =>
   ({ system }) => {
     const loggerActorRef = system.get('logger') as ActorRefFromLogic<typeof logger> | undefined;
-    loggerActorRef?.send({ type: 'log', message });
+    const timerActorRef = system.get('time') as ActorRefFromLogic<typeof time>;
+
+    const emoji = message.split(' ')[0];
+    const messageText = message.slice(emoji.length).trim();
+
+    const logMessage: LogMessage = {
+      emoji,
+      text: messageText,
+      timestamp: timerActorRef.getSnapshot().context.virtualTime,
+    };
+
+    loggerActorRef?.send({ type: 'log', logMessage });
   };
+
+interface LogMessage {
+  timestamp: number;
+  emoji: string;
+  text: string;
+}
 
 const logger = setup({
   types: {
     context: {} as {
-      logs: Array<string>;
+      logs: Array<LogMessage>;
     },
   },
 }).createMachine({
@@ -22,7 +39,7 @@ const logger = setup({
   on: {
     log: {
       actions: assign({
-        logs: ({ context, event }) => [event.message, ...context.logs],
+        logs: ({ context, event }) => [event.logMessage, ...context.logs],
       }),
     },
   },
@@ -95,7 +112,7 @@ const alarmClock = setup({
     },
     ringing: {
       entry: [
-        log('Alarm is ringing! Wake up!'),
+        log('⏰ Alarm is ringing! Wake up!'),
         sendTo(({ system }) => system.get('human'), { type: 'loudNoise' }),
       ],
       after: {
@@ -121,11 +138,11 @@ const cat = createMachine({
       },
     },
     hungry: {
-      entry: log("I'm hungry!"),
+      entry: log("😼 I'm hungry!"),
       after: {
         2_000: {
           actions: [
-            log("I'm so hungry, I'm gonna eat the human!"),
+            log("😼 I'm so hungry, I'm gonna eat the human!"),
             sendTo(({ system }) => system.get('human'), { type: 'getsBitten' }),
           ],
         },
@@ -153,7 +170,7 @@ const human = setup({
       meta: { stateType: 'active' },
       on: {
         getsBitten: {
-          actions: log('Ouch, Johnny bit me!'),
+          actions: log('🤵‍♂️ Ouch, Johnny bit me!'),
         },
       },
     },
