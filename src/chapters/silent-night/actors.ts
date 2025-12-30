@@ -1,4 +1,5 @@
 import { assign, createMachine, fromCallback, sendTo, setup } from 'xstate';
+import type { Meta } from '@/lib/meta';
 import type { ActionFunction, ActorRefFromLogic } from 'xstate';
 
 type AnyActionFunction = ActionFunction<any, any, any, any, any, any, any, any, any>;
@@ -133,17 +134,23 @@ const cat = createMachine({
   },
 });
 
-const human = createMachine({
+const human = setup({
+  types: {
+    meta: {} as Meta,
+  },
+}).createMachine({
   id: 'human',
   initial: 'sleeping',
   states: {
     sleeping: {
+      meta: { stateType: 'inactive' },
       on: {
         loudNoise: 'awake',
         getsBitten: 'dead',
       },
     },
     awake: {
+      meta: { stateType: 'active' },
       on: {
         getsBitten: {
           actions: log('Ouch, Johnny bit me!'),
@@ -157,6 +164,9 @@ const human = createMachine({
 });
 
 const poltergeist = setup({
+  types: {
+    meta: {} as Meta,
+  },
   actors: { timeListener },
 }).createMachine({
   id: 'poltergeist',
@@ -169,9 +179,12 @@ const poltergeist = setup({
     },
   },
   states: {
-    mischievous: {},
+    mischievous: {
+      meta: { stateType: 'active' },
+    },
     failed: {
       type: 'final',
+      meta: { stateType: 'negative' },
     },
   },
 });

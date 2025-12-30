@@ -2,6 +2,7 @@ import { useSelector } from '@xstate/react';
 import { useRootActor } from './context';
 import { ActorCard } from '@/ui/actor-card';
 import { ActorActionButton } from '@/ui/actor-action';
+import { mergeMeta } from '@/lib/meta';
 
 export function AlarmClockCard() {
   const rootRef = useRootActor();
@@ -22,9 +23,20 @@ export function AlarmClockCard() {
 export function HumanCard() {
   const rootRef = useRootActor();
   const childRef = useSelector(rootRef, (x) => x.children.human!);
-  const state = useSelector(childRef, (x) => x.value);
+  const state = useSelector(childRef, (x) => ({
+    value: x.value,
+    stateType: mergeMeta(x.getMeta()).stateType,
+  }));
 
-  return <ActorCard archetype="Human" emoji="🤵‍♂️" name="Mallory" state={state} />;
+  return (
+    <ActorCard
+      archetype="Human"
+      emoji="🤵‍♂️"
+      name="Mallory"
+      state={state.value}
+      stateType={state.stateType}
+    />
+  );
 }
 
 export function CatCard() {
@@ -47,7 +59,18 @@ export function CatCard() {
 export function PoltergeistCard() {
   const rootRef = useRootActor();
   const childRef = useSelector(rootRef, (x) => x.children.poltergeist!);
-  const state = useSelector(childRef, (x) => ({ value: x.value }));
+  const state = useSelector(childRef, (x) => ({
+    value: x.value,
+    stateType: mergeMeta(x.getMeta()).stateType,
+  }));
 
-  return <ActorCard archetype="Poltergeist" emoji="👻" name="You" state={state.value} />;
+  return (
+    <ActorCard
+      archetype="Poltergeist"
+      emoji="👻"
+      name="You"
+      state={state.value}
+      stateType={state.stateType}
+    />
+  );
 }
