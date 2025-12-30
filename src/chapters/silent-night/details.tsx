@@ -26,9 +26,16 @@ export function Logs() {
   const loggerActor = useSelector(actorRef, (x) => x.children.logger!);
   const logs = useSelector(loggerActor, (x) => x.context.logs);
 
+  if (logs.length === 0) {
+    return (
+      <div className="flex min-h-full items-center justify-center text-slate-500">
+        No harm has happened yet
+      </div>
+    );
+  }
+
   return (
     <div className="font-mono">
-      {logs.length === 0 && <div className="text-slate-500">No logs yet</div>}
       {logs.map((log, index) => (
         <div key={index} className="flex items-center gap-4 rounded px-3 py-2 odd:bg-slate-900">
           <div className="text-sm text-slate-500">{formatTime(log.timestamp)}</div>
