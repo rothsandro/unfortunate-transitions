@@ -1,5 +1,7 @@
 import { useSelector } from '@xstate/react';
 import { useRootActor } from './context';
+import { ActorCard } from '@/ui/actor-card';
+import { ActorActionButton } from '@/ui/actor-action';
 
 export function AlarmClockCard() {
   const rootRef = useRootActor();
@@ -11,18 +13,9 @@ export function AlarmClockCard() {
   const onTrigger = () => childRef.send({ type: 'trigger' });
 
   return (
-    <div className="border">
-      <div aria-hidden="true" className="text-7xl">
-        ⏰
-      </div>
-      <h3 className="text-3xl">Alarm Clock</h3>
-      <p>{String(state.value).replace(/^./, (char) => char.toUpperCase())}</p>
-      {!!state.triggerEnabled && (
-        <button type="button" onClick={onTrigger}>
-          Trigger
-        </button>
-      )}
-    </div>
+    <ActorCard archetype="Alarm Clock" emoji="⏰" name="Doom Bell" state={state.value}>
+      {!!state.triggerEnabled && <ActorActionButton onClick={onTrigger}>Trigger</ActorActionButton>}
+    </ActorCard>
   );
 }
 
@@ -31,15 +24,7 @@ export function HumanCard() {
   const childRef = useSelector(rootRef, (x) => x.children.human!);
   const state = useSelector(childRef, (x) => x.value);
 
-  return (
-    <div className="border">
-      <div aria-hidden="true" className="text-7xl">
-        🤵‍♂️
-      </div>
-      <h3 className="text-3xl">Human</h3>
-      <p>{String(state).replace(/^./, (char) => char.toUpperCase())}</p>
-    </div>
-  );
+  return <ActorCard archetype="Human" emoji="🤵‍♂️" name="Mallory" state={state} />;
 }
 
 export function CatCard() {
@@ -53,18 +38,9 @@ export function CatCard() {
   const onNudge = () => childRef.send({ type: 'nudge' });
 
   return (
-    <div className="border">
-      <div aria-hidden="true" className="text-7xl">
-        😼
-      </div>
-      <h3 className="text-3xl">Cat</h3>
-      <p>{String(state.value).replace(/^./, (char) => char.toUpperCase())}</p>
-      {!!state.canNudge && (
-        <button type="button" onClick={onNudge}>
-          Nudge
-        </button>
-      )}
-    </div>
+    <ActorCard archetype="Cat" emoji="😼" name="Luna" state={state.value}>
+      {!!state.canNudge && <ActorActionButton onClick={onNudge}>Nudge</ActorActionButton>}
+    </ActorCard>
   );
 }
 
@@ -73,13 +49,5 @@ export function PoltergeistCard() {
   const childRef = useSelector(rootRef, (x) => x.children.poltergeist!);
   const state = useSelector(childRef, (x) => ({ value: x.value }));
 
-  return (
-    <div className="border">
-      <div aria-hidden="true" className="text-7xl">
-        👻
-      </div>
-      <h3 className="text-3xl">Poltergeist (You)</h3>
-      <p>{String(state.value).replace(/^./, (char) => char.toUpperCase())}</p>
-    </div>
-  );
+  return <ActorCard archetype="Poltergeist" emoji="👻" name="You" state={state.value} />;
 }
