@@ -12,7 +12,7 @@ import {
   stateIn,
   waitFor,
 } from 'xstate';
-import { logger } from './logger';
+import { log, logger } from './logger';
 import { time, timeListener } from './time';
 import { msPerVirtualMin } from './config';
 import type { ActorRefFrom, ActorRefFromLogic } from 'xstate';
@@ -31,6 +31,7 @@ const poltergeist = setup({
       on: { homeless: 'homeless' },
     },
     homeless: {
+      entry: log('👻 NO! My home... burned to ashes!'),
       meta: { stateType: 'terminal' },
     },
   },
@@ -58,12 +59,22 @@ const human = setup({
       },
       always: {
         guard: ({ context }) => context.hungerLevel >= 100,
+        actions: log("🤵‍♂️ I'm getting hungry..."),
         target: 'preparingMeal',
       },
       on: {
-        'food.delivered': 'eating',
-        'cat.inDanger': 'rushing',
-        'house.onFire': 'rushing',
+        'food.delivered': {
+          target: 'eating',
+          actions: log('🤵‍♂️ Oh, my food is here!'),
+        },
+        'cat.inDanger': {
+          target: 'rushing',
+          actions: log('🤵‍♂️ Snowball! Come back!'),
+        },
+        'house.onFire': {
+          target: 'rushing',
+          actions: log('🤵‍♂️ FIRE! I need to get out!'),
+        },
       },
     },
     eating: {
@@ -76,7 +87,10 @@ const human = setup({
               guard: ({ context }) => context.hungerLevel >= 100,
               target: 'devouring',
             },
-            { target: 'normal' },
+            {
+              target: 'normal',
+              actions: log("🤵‍♂️ Mmm, that's good."),
+            },
           ],
         },
         normal: {
@@ -92,6 +106,7 @@ const human = setup({
           },
         },
         devouring: {
+          entry: log("🤵‍♂️ I'm starving! Gotta eat faster!"),
           after: {
             [msPerVirtualMin * 10]: {
               actions: assign({ hungerLevel: -500 }),
@@ -100,28 +115,60 @@ const human = setup({
           },
         },
       },
-      on: { 'house.onFire': 'rushing' },
+      on: {
+        'house.onFire': {
+          target: 'rushing',
+          actions: log('🤵‍♂️ THE HOUSE IS ON FIRE!'),
+        },
+      },
       always: {
         guard: ({ context }) => context.hungerLevel <= 0,
-        actions: assign({ hungerLevel: -200 }),
+        actions: [assign({ hungerLevel: -200 }), log('🤵‍♂️ *yawn* Time for a nap...')],
         target: 'sleeping',
       },
     },
     preparingMeal: {
       meta: { stateType: 'active' },
-      on: { 'house.onFire': 'rushing' },
+      entry: log('🤵‍♂️ Gotta prepare something to eat...'),
+      on: {
+        'house.onFire': {
+          target: 'rushing',
+          actions: log('🤵‍♂️ Are you kidding me?! FIRE!'),
+        },
+      },
       after: {
-        [msPerVirtualMin * 15]: 'eating',
+        [msPerVirtualMin * 15]: {
+          target: 'eating',
+          actions: log('🤵‍♂️ Finally, dinner is ready!'),
+        },
       },
     },
     choking: {
       meta: { stateType: 'danger' },
-      entry: sendParent({ type: 'sos' }, { delay: msPerVirtualMin * 1 }),
-      after: { [msPerVirtualMin * 5]: 'dead' },
-      on: { rescued: '#human.awake', 'house.onFire': 'dead' },
+      entry: [
+        log("🤵‍♂️ *gasp* I'm choking! Someone help me!"),
+        sendParent({ type: 'sos' }, { delay: msPerVirtualMin * 1 }),
+      ],
+      after: {
+        [msPerVirtualMin * 5]: {
+          target: 'dead',
+          actions: log('🤵‍♂️ *silence*'),
+        },
+      },
+      on: {
+        rescued: {
+          target: '#human.awake',
+          actions: log('🤵‍♂️ *cough* Thank you, Gary!'),
+        },
+        'house.onFire': {
+          target: 'dead',
+          actions: log("🤵‍♂️ Can't breathe... fire... *choke*"),
+        },
+      },
     },
     rushing: {
       meta: { stateType: 'active' },
+      entry: log('🤵‍♂️ Running as fast as I can!'),
       after: {
         [msPerVirtualMin]: {
           actions: sendTo(
@@ -129,18 +176,36 @@ const human = setup({
             ({ self }) => ({ type: 'running', from: self }),
           ),
         },
-        [msPerVirtualMin * 3]: 'leftHouse',
+        [msPerVirtualMin * 3]: {
+          target: 'leftHouse',
+          actions: log('🤵‍♂️ Made it out! ...but at what cost?'),
+        },
       },
-      on: { slip: 'slipping' },
+      on: {
+        slip: {
+          target: 'slipping',
+          actions: log('🤵‍♂️ Wha— *SLIP*'),
+        },
+      },
     },
     sleeping: {
       meta: { stateType: 'passive' },
-      on: { 'house.onFire': 'dead' },
+      entry: log('🤵‍♂️ Zzz... zzz...'),
+      on: {
+        'house.onFire': {
+          target: 'dead',
+          actions: log('🤵‍♂️ Zzz... *cough* ...zzz...'),
+        },
+      },
     },
     slipping: {
       meta: { stateType: 'danger' },
+      entry: log('🤵‍♂️ AAAHHH— *CRASH*'),
       after: {
-        [msPerVirtualMin * 1]: 'dead',
+        [msPerVirtualMin * 1]: {
+          target: 'dead',
+          actions: log('🤵‍♂️ Everything... hurts...'),
+        },
       },
     },
     leftHouse: {
@@ -165,19 +230,69 @@ const cat = setup({
   states: {
     sleeping: {
       meta: { stateType: 'passive' },
-      on: { nudge: 'awake', danger: 'dead' },
+      on: {
+        nudge: {
+          target: 'awake',
+          actions: log('🐈‍⬛ *meow* ...what?'),
+        },
+        danger: {
+          target: 'dead',
+          actions: log('🐈‍⬛ *...*'),
+        },
+      },
     },
     awake: {
       meta: { stateType: 'active' },
-      on: { rideAvailable: 'riding', scare: 'panicking', danger: 'panicking' },
+      on: {
+        rideAvailable: {
+          target: 'riding',
+          actions: log('🐈‍⬛ *hops on* Meow!'),
+        },
+        scare: {
+          target: 'panicking',
+          actions: log('🐈‍⬛ HISSSSS!'),
+        },
+        danger: {
+          target: 'panicking',
+          actions: log('🐈‍⬛ *SCREEEECH*'),
+        },
+      },
     },
     riding: {
       meta: { stateType: 'active' },
-      on: { scare: 'panicking', danger: 'panicking', rideStopped: 'awake' },
+      entry: log('🐈‍⬛ Purrrr...'),
+      on: {
+        scare: {
+          target: 'panicking',
+          actions: log('🐈‍⬛ *YOWL*'),
+        },
+        danger: {
+          target: 'panicking',
+          actions: log('🐈‍⬛ *jumps off* REEOOWW!'),
+        },
+        rideStopped: {
+          target: 'awake',
+          actions: log('🐈‍⬛ *stretches*'),
+        },
+      },
     },
     panicking: {
       meta: { stateType: 'danger' },
-      on: { escape: 'escaped', hide: 'hidden', die: 'dead' },
+      entry: log('🐈‍⬛ *frantically looking for escape*'),
+      on: {
+        escape: {
+          target: 'escaped',
+          actions: log('🐈‍⬛ *leaps through window*'),
+        },
+        hide: {
+          target: 'hidden',
+          actions: log('🐈‍⬛ *dives under couch*'),
+        },
+        die: {
+          target: 'dead',
+          actions: log('🐈‍⬛ *...silence...*'),
+        },
+      },
       after: {
         [msPerVirtualMin * 1]: {
           actions: enqueueActions(({ system, enqueue, event }) => {
@@ -197,7 +312,13 @@ const cat = setup({
     },
     hidden: {
       meta: { stateType: 'passive' },
-      on: { danger: 'dead' },
+      entry: log('🐈‍⬛ *trembling*'),
+      on: {
+        danger: {
+          target: 'dead',
+          actions: log('🐈‍⬛ *choked meow*'),
+        },
+      },
     },
     dead: {
       type: 'final',
@@ -248,7 +369,7 @@ const christmasTree = setup({
           on: {
             nudge: {
               target: 'wobbling',
-              actions: assign({ wobbleIntensity: 1 }),
+              actions: [assign({ wobbleIntensity: 1 }), log('🎄 *wobble wobble*')],
             },
           },
         },
@@ -263,6 +384,7 @@ const christmasTree = setup({
           always: [
             {
               guard: ({ context }) => context.wobbleIntensity >= 6,
+              actions: log('🎄 *TIMBER!*'),
               target: 'fallen',
             },
             {
@@ -280,16 +402,18 @@ const christmasTree = setup({
         },
         fallen: {
           meta: { stateType: 'passive' },
-          entry: sendParent({ type: 'christmasTree.fallen' }),
+          entry: [sendParent({ type: 'christmasTree.fallen' }), log('🎄 *creaking on the floor*')],
           after: {
             [msPerVirtualMin * 5]: {
               guard: stateIn('candles.lit'),
+              actions: log('🎄 The candles reach the carpet...'),
               target: 'burning',
             },
           },
         },
         burning: {
           meta: { stateType: 'danger' },
+          entry: log('🎄 *WHOOOOSH*'),
           after: {
             [msPerVirtualMin * 5]: {
               actions: sendParent({ type: 'christmasTree.burning' }),
@@ -327,7 +451,7 @@ const plant = setup({
       on: {
         push: {
           target: 'fallen',
-          actions: sendParent({ type: 'plant.falling' }),
+          actions: [sendParent({ type: 'plant.falling' }), log('🪴 *CRASH* Dirt everywhere!')],
         },
       },
     },
@@ -381,12 +505,14 @@ const robotMop = setup({
       entry: [
         sendParent({ type: 'robotMop.cleaning' }),
         sendTo(({ context }) => context.floor, { type: 'wet' }),
+        log('🤖 Dirt detected. Commencing cleaning protocol.'),
       ],
       after: {
         [msPerVirtualMin * 30]: {
           actions: [
             sendParent({ type: 'robotMop.done' }),
             sendTo(({ context }) => context.floor, { type: 'dry' }),
+            log('🤖 Cleaning cycle complete. Returning to dock.'),
           ],
           target: 'docked',
         },
@@ -431,15 +557,21 @@ const foodDeliveryService = setup({
       meta: { stateType: 'passive' },
       always: {
         guard: ({ context }) => isTime(context.time, '18:00'),
+        actions: log('🍔 Order up! On my way!'),
         target: 'delivering',
       },
     },
     delivering: {
       meta: { stateType: 'active' },
-      on: { bonked: 'stargazing' },
+      on: {
+        bonked: {
+          target: 'stargazing',
+          actions: log('🍔 Ow! What the— *bonk* ...pretty stars...'),
+        },
+      },
       always: {
         guard: ({ context }) => isTime(context.time, '18:15'),
-        actions: sendParent({ type: 'food.delivered' }),
+        actions: [sendParent({ type: 'food.delivered' }), log('🍔 Delivery complete!')],
         target: 'offDuty',
       },
     },
@@ -448,6 +580,7 @@ const foodDeliveryService = setup({
     },
     stargazing: {
       type: 'final',
+      entry: log('🍔 Zzz... so many stars...'),
       meta: { stateType: 'terminal' },
     },
   },
@@ -469,11 +602,24 @@ const neighbor = setup({
     },
     helping: {
       meta: { stateType: 'active' },
-      entry: sendTo(({ event }) => event.from, { type: 'rescued' }),
-      after: { [msPerVirtualMin * 10]: 'untanglingChristmasLights' },
+      entry: [
+        sendTo(({ event }) => event.from, { type: 'rescued' }),
+        log('🙎‍♂️ Hang on, buddy! The Heimlich maneuver!'),
+      ],
+      after: {
+        [msPerVirtualMin * 10]: {
+          target: 'untanglingChristmasLights',
+          actions: log("🙎‍♂️ You're welcome. Merry Christmas!"),
+        },
+      },
     },
   },
-  on: { sos: '.helping' },
+  on: {
+    sos: {
+      target: '.helping',
+      actions: log('🙎‍♂️ I heard someone choking!'),
+    },
+  },
 });
 
 export const scene = setup({

@@ -1,6 +1,7 @@
 import { useSelector } from '@xstate/react';
 import { Moon, Sun } from 'lucide-react';
 import { useRootActor } from './context';
+import type { ReactNode } from 'react';
 import { formatTime } from '@/lib/time';
 
 export function Time() {
@@ -40,9 +41,21 @@ export function Logs() {
         <div key={index} className="flex items-center gap-4 rounded px-3 py-2 odd:bg-slate-900">
           <div className="text-sm text-slate-500">{formatTime(log.timestamp)}</div>
           <div>{log.emoji}</div>
-          <div>{log.text}</div>
+          <div>{parseLogText(log.text)}</div>
         </div>
       ))}
     </div>
   );
+}
+
+function parseLogText(text: string): Array<ReactNode> {
+  const parts = text.split('*');
+
+  return parts.map((part, index) => {
+    // Odd indices are between asterisks, so render them as italic
+    if (index % 2 === 1) {
+      return <i key={index}>{part}</i>;
+    }
+    return part;
+  });
 }
