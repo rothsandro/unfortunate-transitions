@@ -66,8 +66,10 @@ function ChapterCompleteMessage() {
   return (
     <div className="mt-12">
       <div className="text-7xl">💀</div>
-      <h1 className="mt-6 text-4xl font-semibold text-emerald-500">Chapter Complete!</h1>
-      <p className="mt-4 text-lg">No witnesses, no evidence, no pulse. Perfect.</p>
+      <h1 className="mt-6 font-spooky text-4xl font-semibold text-emerald-500">Chapter Complete</h1>
+      <p className="mt-4 font-serif text-2xl">
+        Everything went according to plan. Well, your plan.
+      </p>
       <Link
         to="."
         className="mt-6 flex items-center justify-center gap-2 rounded bg-slate-800 p-3 text-white"
@@ -82,9 +84,9 @@ function ChapterCompleteMessage() {
 function ChapterFailedMessage() {
   return (
     <div className="mt-12">
-      <div className="text-7xl">🙃</div>
-      <h1 className="mt-6 text-4xl font-semibold text-red-500">A Happy Ending</h1>
-      <p className="mt-4 text-lg">For them. You're still dead and now also disappointed.</p>
+      <div className="text-7xl">🤦</div>
+      <h1 className="mt-6 font-spooky text-4xl font-semibold text-red-500">Mission Failed</h1>
+      <p className="mt-4 font-serif text-2xl">Centuries of haunting experience, wasted.</p>
       <Link
         to="."
         className="mt-6 flex items-center justify-center gap-2 rounded bg-red-600 p-3 text-white"

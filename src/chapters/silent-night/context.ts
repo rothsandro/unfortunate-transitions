@@ -1,8 +1,8 @@
 import { createContext, use } from 'react';
 import type { ActorRefFrom } from 'xstate';
-import type { rootMachine } from './actors';
+import type { scene } from './actors';
 
-export const context = createContext<ActorRefFrom<typeof rootMachine> | null>(null);
+export const context = createContext<ActorRefFrom<typeof scene> | null>(null);
 
 export function useRootActor() {
   const ctx = use(context);

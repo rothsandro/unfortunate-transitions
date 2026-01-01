@@ -1,6 +1,17 @@
-import { rootMachine } from './actors';
+import { scene } from './actors';
 import code from './actors?raw';
-import { AlarmClockCard, CatCard, HumanCard, PoltergeistCard } from './cards';
+import {
+  CatCard,
+  ChristmasTreeCard,
+  FoodDeliveryServiceCard,
+  HumanCard,
+  NeighborCard,
+  PlantCard,
+  PoltergeistCard,
+  RobotMopCard,
+  TelevisionCard,
+  WindowCard,
+} from './cards';
 import { context } from './context';
 import { Logs, Time } from './details';
 
@@ -18,10 +29,21 @@ export const silentNight = {
       sanctus est Lorem ipsum dolor sit amet.
     </p>
   ),
-  machine: rootMachine,
+  machine: scene,
   context,
   code,
   Time,
   Logs,
-  actors: { PoltergeistCard, AlarmClockCard, HumanCard, CatCard },
+  actors: {
+    PoltergeistCard,
+    HumanCard,
+    CatCard,
+    ChristmasTreeCard,
+    WindowCard,
+    PlantCard,
+    TelevisionCard,
+    RobotMopCard,
+    NeighborCard,
+    FoodDeliveryServiceCard,
+  },
 };

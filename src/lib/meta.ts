@@ -1,4 +1,4 @@
-export type StateType = 'inactive' | 'active' | 'negative';
+export type StateType = 'spooky' | 'active' | 'passive' | 'danger' | 'terminal';
 
 export interface Meta {
   stateType?: StateType;
