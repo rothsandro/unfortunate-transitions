@@ -19,15 +19,23 @@ export const silentNight = {
   chapter: 'Chapter I',
   title: 'Silent Night',
   intro: (
-    <p>
-      Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
-      invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
-      justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem
-      ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
-      eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos
-      et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
-      sanctus est Lorem ipsum dolor sit amet.
-    </p>
+    <>
+      <p>
+        It's December 24th, and you're a poltergeist with a problem. That problem is Mallory, the
+        insufferably cheerful human who lives in your house - yes, YOUR house - along with his cat
+        Snowball. He's decorated everything with gaudy lights, put up a tree, and is probably about
+        to sing carols. Unacceptable.
+      </p>
+      <p>
+        Your mission: eliminate Mallory before midnight strikes. The catch? You're a poltergeist,
+        not some overpowered deity. Your powers are limited to the subtle and indirect - you'll need
+        to be creative. Direct confrontation is off the table. Where's the fun in that anyway?
+      </p>
+      <p>
+        A word of caution: you're rather attached to having a roof over your... well, spectral form.
+        Some solutions may have unintended consequences. Choose your chaos wisely.
+      </p>
+    </>
   ),
   machine: scene,
   context,

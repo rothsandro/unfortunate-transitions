@@ -14,7 +14,7 @@ function RouteComponent() {
 
   return (
     <silentNight.context value={actorRef}>
-      <div className="grid h-screen grid-cols-[400px_minmax(0,1fr)] grid-rows-1">
+      <div className="grid h-screen grid-cols-[360px_minmax(0,1fr)] grid-rows-1">
         <Sidepanel />
         <main className="relative grid h-full grid-rows-[minmax(0,4fr)_minmax(0,3fr)] overflow-clip">
           <silentNight.Time />
@@ -55,7 +55,9 @@ function Sidepanel() {
             <span className="block font-spooky text-3xl">{silentNight.title}</span>
           </h1>
           <hr className="my-6 border-slate-800" />
-          <div className="font-serif text-lg text-slate-400 italic">{silentNight.intro}</div>
+          <div className="space-y-4 font-serif text-lg text-slate-400 italic">
+            {silentNight.intro}
+          </div>
         </>
       )}
     </aside>
