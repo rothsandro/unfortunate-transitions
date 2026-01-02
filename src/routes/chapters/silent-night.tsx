@@ -10,6 +10,7 @@ import { useSafeContext } from '@/lib/context';
 import { applySyntaxHighlighting } from '@/lib/syntax-highlighting';
 import { game } from '@/model/game-actor';
 import { Spinner } from '@/ui/spinner';
+import { SocialLinks } from '@/ui/social-links';
 
 export const Route = createFileRoute('/chapters/silent-night')({
   component: RouteComponent,
@@ -58,46 +59,50 @@ function Sidepanel(props: { onRestart: VoidFunction }) {
   }));
 
   return (
-    <aside
+    <div
       className={clsx(
-        'relative flex min-h-full flex-col overflow-auto p-8',
+        'flex flex-col',
         !!state.hasWon && 'border-r border-emerald-950 bg-emerald-950/40',
         !!state.hasLost && 'border-r border-red-950 bg-red-950/30',
       )}
     >
-      <BackButton />
+      <aside className="relative flex grow flex-col overflow-auto p-8">
+        <BackButton />
 
-      {!!state.hasWon && <ChapterCompleteMessage onRestart={onRestart} />}
-      {!!state.hasLost && <ChapterFailedMessage onRestart={onRestart} />}
-      {!state.isDone && (
-        <>
-          <div className="flex items-end justify-between">
-            <h1 className="mt-12">
-              <span className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
-                {silentNight.chapter}
-              </span>
-              <span className="block font-spooky text-3xl">{silentNight.title}</span>
-            </h1>
-            <button
-              type="button"
-              className="mb-1 cursor-pointer text-slate-300"
-              onClick={onRestart}
-            >
-              <RotateCcw />
-              <span className="sr-only">Restart Chapter</span>
-            </button>
-          </div>
-          <hr className="my-6 border-slate-800" />
-          <div className="grow space-y-4 font-serif text-lg text-slate-400">
-            {silentNight.intro}
-          </div>
-        </>
-      )}
-
-      <div className="sticky bottom-0 mt-8 flex justify-between">
-        <silentNight.Time />
-      </div>
-    </aside>
+        {!!state.hasWon && <ChapterCompleteMessage onRestart={onRestart} />}
+        {!!state.hasLost && <ChapterFailedMessage onRestart={onRestart} />}
+        {!state.isDone && (
+          <>
+            <div className="flex items-end justify-between">
+              <h1 className="mt-12">
+                <span className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
+                  {silentNight.chapter}
+                </span>
+                <span className="block font-spooky text-3xl">{silentNight.title}</span>
+              </h1>
+              <button
+                type="button"
+                className="mb-1 cursor-pointer text-slate-300"
+                onClick={onRestart}
+              >
+                <RotateCcw />
+                <span className="sr-only">Restart Chapter</span>
+              </button>
+            </div>
+            <hr className="my-6 border-slate-800" />
+            <div className="grow space-y-4 font-serif text-lg text-slate-400">
+              {silentNight.intro}
+            </div>
+          </>
+        )}
+        <div className="sticky bottom-0 mt-8">
+          <silentNight.Time />
+        </div>
+      </aside>
+      <footer className="ms-8 border-t border-slate-800 py-4">
+        <SocialLinks />
+      </footer>
+    </div>
   );
 }
 

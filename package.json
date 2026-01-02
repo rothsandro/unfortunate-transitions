@@ -16,6 +16,7 @@
     "@fontsource-variable/crimson-pro": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource/creepster": "^5.2.7",
+    "@icons-pack/react-simple-icons": "^13.8.0",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/react-router": "^1.132.0",

@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { ArrowRight } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
+import { SocialLinks } from '@/ui/social-links';
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
@@ -44,12 +45,26 @@ function Container(props: PropsWithChildren) {
 
   return (
     <div
-      className="relative flex min-h-screen items-center p-12 before:pointer-events-none
-        before:absolute before:inset-0 before:-z-10 before:block
+      className="relative grid min-h-screen grid-rows-[1fr_auto] items-center
+        before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:block
         before:bg-[radial-gradient(circle_at_20%_30%,rgba(125,211,252,0.15)_0%,transparent_40%),radial-gradient(circle_at_80%_70%,rgba(244,114,182,0.08)_0%,transparent_35%)]
         before:content-['']"
     >
-      <main className="mx-auto text-center">{children}</main>
+      <main className="mx-auto p-8 text-center">{children}</main>
+      <footer className="flex flex-wrap items-center justify-between gap-3 px-8 py-4">
+        <p className="text-sm text-slate-400">
+          An unfortunate creation by{' '}
+          <a
+            href="https://sandroroth.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-slate-300"
+          >
+            Sandro Roth
+          </a>
+        </p>
+        <SocialLinks />
+      </footer>
     </div>
   );
 }
