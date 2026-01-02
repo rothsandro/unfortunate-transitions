@@ -1,6 +1,6 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useActorRef, useSelector } from '@xstate/react';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, RotateCcw } from 'lucide-react';
 import clsx from 'clsx';
 import { Pane, SplitPane } from 'react-split-pane';
 import { silentNight } from '@/chapters/silent-night';
@@ -8,6 +8,8 @@ import { Tab, TabList, TabPanel, Tabs } from '@/ui/tabs';
 import { BackButton } from '@/ui/back-button';
 import { useSafeContext } from '@/lib/context';
 import { applySyntaxHighlighting } from '@/lib/syntax-highlighting';
+import { game } from '@/model/game-actor';
+import { Spinner } from '@/ui/spinner';
 
 export const Route = createFileRoute('/chapters/silent-night')({
   component: RouteComponent,
@@ -15,12 +17,17 @@ export const Route = createFileRoute('/chapters/silent-night')({
 });
 
 function RouteComponent() {
-  const actorRef = useActorRef(silentNight.machine);
+  const gameActorRef = useActorRef(game.provide({ actors: { chapter: silentNight.machine } }));
+  const actorRef = useSelector(gameActorRef, (x) => x.children.chapter);
+
+  const restart = () => gameActorRef.send({ type: 'reset' });
+
+  if (!actorRef) return <Spinner label="Spawning new chaos..." />;
 
   return (
     <silentNight.context value={actorRef}>
       <div className="grid h-screen grid-cols-[340px_minmax(0,1fr)] grid-rows-1">
-        <Sidepanel />
+        <Sidepanel onRestart={restart} />
         <main>
           <SplitPane
             direction="vertical"
@@ -40,7 +47,9 @@ function RouteComponent() {
   );
 }
 
-function Sidepanel() {
+function Sidepanel(props: { onRestart: VoidFunction }) {
+  const { onRestart } = props;
+
   const actorRef = useSafeContext(silentNight.context);
   const state = useSelector(actorRef, (x) => ({
     isDone: x.status === 'done',
@@ -58,16 +67,26 @@ function Sidepanel() {
     >
       <BackButton />
 
-      {!!state.hasWon && <ChapterCompleteMessage />}
-      {!!state.hasLost && <ChapterFailedMessage />}
+      {!!state.hasWon && <ChapterCompleteMessage onRestart={onRestart} />}
+      {!!state.hasLost && <ChapterFailedMessage onRestart={onRestart} />}
       {!state.isDone && (
         <>
-          <h1 className="mt-12">
-            <span className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
-              {silentNight.chapter}
-            </span>
-            <span className="block font-spooky text-3xl">{silentNight.title}</span>
-          </h1>
+          <div className="flex items-end justify-between">
+            <h1 className="mt-12">
+              <span className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
+                {silentNight.chapter}
+              </span>
+              <span className="block font-spooky text-3xl">{silentNight.title}</span>
+            </h1>
+            <button
+              type="button"
+              className="mb-1 cursor-pointer text-slate-300"
+              onClick={onRestart}
+            >
+              <RotateCcw />
+              <span className="sr-only">Restart Chapter</span>
+            </button>
+          </div>
           <hr className="my-6 border-slate-800" />
           <div className="grow space-y-4 font-serif text-lg text-slate-400">
             {silentNight.intro}
@@ -75,14 +94,16 @@ function Sidepanel() {
         </>
       )}
 
-      <div className="sticky bottom-0 mt-8">
+      <div className="sticky bottom-0 mt-8 flex justify-between">
         <silentNight.Time />
       </div>
     </aside>
   );
 }
 
-function ChapterCompleteMessage() {
+function ChapterCompleteMessage(props: { onRestart: VoidFunction }) {
+  const { onRestart } = props;
+
   return (
     <div className="mt-12 grow">
       <div className="text-7xl">💀</div>
@@ -90,30 +111,34 @@ function ChapterCompleteMessage() {
       <p className="mt-4 font-serif text-2xl">
         Everything went according to plan. Well, your plan.
       </p>
-      <Link
-        to="."
-        className="mt-6 flex items-center justify-center gap-2 rounded bg-slate-800 p-3 text-white"
-        reloadDocument
+      <button
+        type="button"
+        className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded
+          bg-slate-800 p-3 text-white"
+        onClick={onRestart}
       >
         <RefreshCcw size={20} /> Restart Chapter
-      </Link>
+      </button>
     </div>
   );
 }
 
-function ChapterFailedMessage() {
+function ChapterFailedMessage(props: { onRestart: VoidFunction }) {
+  const { onRestart } = props;
+
   return (
     <div className="mt-12 grow">
       <div className="text-7xl">🤦</div>
       <h1 className="mt-6 font-spooky text-4xl font-semibold text-red-500">Mission Failed</h1>
       <p className="mt-4 font-serif text-2xl">Centuries of haunting experience, wasted.</p>
-      <Link
-        to="."
-        className="mt-6 flex items-center justify-center gap-2 rounded bg-red-600 p-3 text-white"
-        reloadDocument
+      <button
+        type="button"
+        className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded
+          bg-red-600 p-3 text-white"
+        onClick={onRestart}
       >
         <RefreshCcw size={20} /> Try Again
-      </Link>
+      </button>
     </div>
   );
 }
