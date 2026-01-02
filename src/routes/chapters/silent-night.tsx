@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import { useActorRef, useSelector } from '@xstate/react';
 import { RefreshCcw } from 'lucide-react';
 import clsx from 'clsx';
+import { Pane, SplitPane } from 'react-split-pane';
 import { silentNight } from '@/chapters/silent-night';
 import { Tab, TabList, TabPanel, Tabs } from '@/ui/tabs';
 import { BackButton } from '@/ui/back-button';
@@ -20,12 +21,19 @@ function RouteComponent() {
     <silentNight.context value={actorRef}>
       <div className="grid h-screen grid-cols-[340px_minmax(0,1fr)] grid-rows-1">
         <Sidepanel />
-        <main
-          className="relative grid h-full grid-rows-[minmax(0,4fr)_minmax(0,3fr)] gap-4
-            overflow-clip"
-        >
-          <ActorCards />
-          <Drawer />
+        <main>
+          <SplitPane
+            direction="vertical"
+            dividerStyle={{ height: 4 }}
+            dividerClassName="mx-6 outline-none focus-visible:bg-accent"
+          >
+            <Pane minSize={200} defaultSize="60%">
+              <ActorCards />
+            </Pane>
+            <Pane minSize={200}>
+              <Drawer />
+            </Pane>
+          </SplitPane>
         </main>
       </div>
     </silentNight.context>
@@ -127,7 +135,7 @@ function Drawer() {
   const { code } = Route.useLoaderData();
 
   return (
-    <div className="mx-6 rounded-t-xl border border-slate-800/70 bg-slate-800/30 shadow">
+    <div className="mx-6 h-full rounded-t-xl border border-slate-800/70 bg-slate-800/30 shadow">
       <Tabs defaultValue="logs">
         <TabList>
           <Tab value="logs">Occurrences</Tab>
