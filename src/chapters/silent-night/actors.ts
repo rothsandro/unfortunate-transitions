@@ -2,6 +2,7 @@ import {
   assign,
   enqueueActions,
   forwardTo,
+  fromCallback,
   fromPromise,
   not,
   or,
@@ -40,23 +41,28 @@ const poltergeist = setup({
 const human = setup({
   types: {
     meta: {} as Meta,
-    context: {} as { hungerLevel: number },
+    context: {} as { hungerLevel: number; tv: ActorRefFromLogic<typeof television> | null },
     output: {} as { deceased: boolean },
+  },
+  actors: {
+    getHungry: fromCallback(({ sendBack }) => {
+      const id = setInterval(() => sendBack({ type: 'incrementHunger' }), msPerVirtualMin);
+      return () => clearInterval(id);
+    }),
+  },
+  actions: {
+    incrementHunger: assign({
+      hungerLevel: ({ context }) => context.hungerLevel + 1,
+    }),
   },
 }).createMachine({
   id: 'human',
-  context: { hungerLevel: 0 },
+  context: { hungerLevel: 0, tv: null },
   initial: 'awake',
   states: {
     awake: {
       meta: { stateType: 'active' },
-      after: {
-        [msPerVirtualMin]: {
-          target: '.',
-          reenter: true,
-          actions: assign({ hungerLevel: ({ context }) => context.hungerLevel + 1 }),
-        },
-      },
+      invoke: { src: 'getHungry' },
       always: {
         guard: ({ context }) => context.hungerLevel >= 100,
         actions: log("🤵‍♂️ I'm getting hungry..."),
@@ -74,6 +80,37 @@ const human = setup({
         'house.onFire': {
           target: 'rushing',
           actions: log('🤵‍♂️ FIRE! I need to get out!'),
+        },
+        'television.turnedOn': {
+          target: 'watchingTelevision',
+          actions: [assign({ tv: ({ event }) => event.tv }), log('🤵‍♂️ Ah, time to relax!')],
+        },
+      },
+    },
+    watchingTelevision: {
+      meta: { stateType: 'active' },
+      invoke: { src: 'getHungry' },
+      after: {
+        [msPerVirtualMin * 30]: {
+          target: 'awake',
+          actions: [
+            log('🤵‍♂️ That was a good movie. Time to do something else.'),
+            sendTo(({ context }) => context.tv!, { type: 'turnOff' }),
+          ],
+        },
+      },
+      on: {
+        'food.delivered': {
+          target: 'eating',
+          actions: log('🤵‍♂️ Oh, my food is here!'),
+        },
+        'house.onFire': {
+          target: 'rushing',
+          actions: log('🤵‍♂️ FIRE! I need to get out!'),
+        },
+        'television.turnedOff': {
+          target: 'awake',
+          actions: log('🤵‍♂️ Huh? The TV turned off?'),
         },
       },
     },
@@ -202,7 +239,7 @@ const human = setup({
       meta: { stateType: 'danger' },
       entry: log('🤵‍♂️ AAAHHH *CRASH*'),
       after: {
-        [msPerVirtualMin * 1]: {
+        [msPerVirtualMin]: {
           target: 'dead',
           actions: log('🤵‍♂️ Everything... hurts...'),
         },
@@ -218,6 +255,9 @@ const human = setup({
       meta: { stateType: 'terminal' },
       output: { deceased: true },
     },
+  },
+  on: {
+    incrementHunger: { actions: 'incrementHunger' },
   },
   output: ({ event }) => event.output as { deceased: boolean },
 });
@@ -249,7 +289,7 @@ const cat = setup({
           actions: log('🐈‍⬛ *hops on* Meow!'),
         },
         scare: {
-          target: 'panicking',
+          target: 'scared',
           actions: log('🐈‍⬛ HISSSSS!'),
         },
         danger: {
@@ -276,6 +316,14 @@ const cat = setup({
         },
       },
     },
+    scared: {
+      meta: { stateType: 'danger' },
+      entry: log('🐈‍⬛ *ears back, tail puffed*'),
+      after: {
+        [msPerVirtualMin]: 'hidden',
+      },
+      on: { danger: 'panicking' },
+    },
     panicking: {
       meta: { stateType: 'danger' },
       entry: log('🐈‍⬛ *frantically looking for escape*'),
@@ -294,7 +342,7 @@ const cat = setup({
         },
       },
       after: {
-        [msPerVirtualMin * 1]: {
+        [msPerVirtualMin]: {
           actions: enqueueActions(({ system, enqueue, event }) => {
             const windowRef: ActorRefFrom<typeof window> = system.get('window');
             const isWindowOpen = windowRef.getSnapshot().value === 'open';
@@ -464,15 +512,32 @@ const plant = setup({
 const television = setup({
   types: { meta: {} as Meta },
 }).createMachine({
-  initial: 'on',
+  initial: 'off',
   states: {
     off: {
       meta: { stateType: 'passive' },
-      on: { turnOn: 'on' },
+      on: {
+        turnOn: {
+          actions: [
+            log('📺 *static* ...'),
+            sendParent(({ self }) => ({ type: 'television.turnedOn', tv: self })),
+          ],
+          target: 'on',
+        },
+      },
     },
     on: {
       meta: { stateType: 'active' },
-      on: { turnOff: 'off' },
+      entry: log('📺 Playing "Die Hard: The Hallmark Edit"'),
+      on: {
+        turnOff: {
+          actions: [
+            log('📺 *click*'),
+            sendParent(({ self }) => ({ type: 'television.turnedOff', tv: self })),
+          ],
+          target: 'off',
+        },
+      },
     },
   },
 });
@@ -770,6 +835,8 @@ export const scene = setup({
             sendTo('poltergeist', { type: 'homeless' }),
           ],
         },
+        'television.turnedOn': { actions: forwardTo('human') },
+        'television.turnedOff': { actions: forwardTo('human') },
         'food.delivered': { actions: forwardTo('human') },
         sos: {
           actions: enqueueActions(({ system, enqueue }) => {
