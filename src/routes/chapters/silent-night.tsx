@@ -6,8 +6,12 @@ import { silentNight } from '@/chapters/silent-night';
 import { Tab, TabList, TabPanel, Tabs } from '@/ui/tabs';
 import { BackButton } from '@/ui/back-button';
 import { useSafeContext } from '@/lib/context';
+import { applySyntaxHighlighting } from '@/lib/syntax-highlighting';
 
-export const Route = createFileRoute('/chapters/silent-night')({ component: RouteComponent });
+export const Route = createFileRoute('/chapters/silent-night')({
+  component: RouteComponent,
+  loader: async () => ({ code: await applySyntaxHighlighting(silentNight.code) }),
+});
 
 function RouteComponent() {
   const actorRef = useActorRef(silentNight.machine);
@@ -120,6 +124,8 @@ function ActorCards() {
 }
 
 function Drawer() {
+  const { code } = Route.useLoaderData();
+
   return (
     <div className="mx-6 rounded-t-xl border border-slate-800/70 bg-slate-800/30 shadow">
       <Tabs defaultValue="logs">
@@ -131,7 +137,7 @@ function Drawer() {
           <silentNight.Logs />
         </TabPanel>
         <TabPanel value="code" keepMounted>
-          <pre>{silentNight.code}</pre>
+          <div dangerouslySetInnerHTML={{ __html: code }} />
         </TabPanel>
       </Tabs>
     </div>
