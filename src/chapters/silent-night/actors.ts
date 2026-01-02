@@ -184,7 +184,7 @@ const human = setup({
       on: {
         slip: {
           target: 'slipping',
-          actions: log('🤵‍♂️ Wha— *SLIP*'),
+          actions: log('🤵‍♂️ Wha... *SLIP*'),
         },
       },
     },
@@ -200,7 +200,7 @@ const human = setup({
     },
     slipping: {
       meta: { stateType: 'danger' },
-      entry: log('🤵‍♂️ AAAHHH— *CRASH*'),
+      entry: log('🤵‍♂️ AAAHHH *CRASH*'),
       after: {
         [msPerVirtualMin * 1]: {
           target: 'dead',
@@ -566,7 +566,7 @@ const foodDeliveryService = setup({
       on: {
         bonked: {
           target: 'stargazing',
-          actions: log('🍔 Ow! What the— *bonk* ...pretty stars...'),
+          actions: log('🍔 Ow! What the - *bonk* ...pretty stars...'),
         },
       },
       always: {

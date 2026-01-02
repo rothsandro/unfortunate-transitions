@@ -51,7 +51,7 @@ export const silentNight = {
     PlantCard,
     TelevisionCard,
     RobotMopCard,
-    NeighborCard,
     FoodDeliveryServiceCard,
+    NeighborCard,
   },
 };

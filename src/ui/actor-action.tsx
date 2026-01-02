@@ -7,8 +7,9 @@ export function ActorActionButton(props: ComponentProps<'button'>) {
       type="button"
       {...props}
       className={clsx(
-        `w-full rounded border border-slate-700 px-4 py-2 font-serif transition-all
-        hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50`,
+        `relative cursor-pointer rounded border-slate-700 bg-accent/10 px-2 py-0.5 font-mono text-sm
+        text-accent transition-all active:scale-[.97] disabled:cursor-not-allowed
+        disabled:opacity-50`,
         props.className,
       )}
     />

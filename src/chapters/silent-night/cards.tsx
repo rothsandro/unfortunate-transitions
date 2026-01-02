@@ -80,19 +80,19 @@ export function ChristmasTreeCard() {
     >
       {state.canNudge && (
         <ActorActionButton onClick={() => state.canNudge && actorRef.send({ type: 'nudge' })}>
-          Nudge
+          Shake
         </ActorActionButton>
       )}
       {state.canIgnite && (
         <ActorActionButton onClick={() => state.canIgnite && actorRef.send({ type: 'ignite' })}>
-          Invoke Flame
+          Ignite
         </ActorActionButton>
       )}
       {state.canExtinguish && (
         <ActorActionButton
           onClick={() => state.canExtinguish && actorRef.send({ type: 'extinguish' })}
         >
-          Whisper to the flames
+          Snuff
         </ActorActionButton>
       )}
     </ActorCard>
@@ -146,7 +146,7 @@ export function PlantCard() {
     >
       {!!state.canPush && (
         <ActorActionButton onClick={() => actorRef.send({ type: 'push' })}>
-          Whisper to gravity
+          Topple
         </ActorActionButton>
       )}
     </ActorCard>
