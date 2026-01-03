@@ -66,8 +66,8 @@ export function ChristmasTreeCard() {
     isLit: x.value.candles === 'lit',
     stateType: mergeMeta(x.getMeta()).stateType,
     canNudge: x.can({ type: 'nudge' }),
-    canIgnite: x.can({ type: 'ignite' }),
-    canExtinguish: x.can({ type: 'extinguish' }),
+    canIgnite: x.can({ type: 'candles.ignite' }),
+    canExtinguish: x.can({ type: 'candles.extinguish' }),
   }));
 
   return (
@@ -84,13 +84,15 @@ export function ChristmasTreeCard() {
         </ActorActionButton>
       )}
       {state.canIgnite && (
-        <ActorActionButton onClick={() => state.canIgnite && actorRef.send({ type: 'ignite' })}>
+        <ActorActionButton
+          onClick={() => state.canIgnite && actorRef.send({ type: 'candles.ignite' })}
+        >
           Ignite
         </ActorActionButton>
       )}
       {state.canExtinguish && (
         <ActorActionButton
-          onClick={() => state.canExtinguish && actorRef.send({ type: 'extinguish' })}
+          onClick={() => state.canExtinguish && actorRef.send({ type: 'candles.extinguish' })}
         >
           Snuff
         </ActorActionButton>
@@ -136,6 +138,8 @@ export function PlantCard() {
     canPush: x.can({ type: 'push' }),
   }));
 
+  const onPush = () => actorRef.send({ type: 'push' });
+
   return (
     <ActorCard
       archetype="Plant"
@@ -144,11 +148,7 @@ export function PlantCard() {
       state={state.value}
       stateType={state.stateType}
     >
-      {!!state.canPush && (
-        <ActorActionButton onClick={() => actorRef.send({ type: 'push' })}>
-          Topple
-        </ActorActionButton>
-      )}
+      {!!state.canPush && <ActorActionButton onClick={onPush}>Topple</ActorActionButton>}
     </ActorCard>
   );
 }
