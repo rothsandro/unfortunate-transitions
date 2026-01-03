@@ -73,8 +73,8 @@ function Sidepanel(props: { onRestart: VoidFunction }) {
         {!!state.hasLost && <ChapterFailedMessage onRestart={onRestart} />}
         {!state.isDone && (
           <>
-            <div className="flex items-end justify-between">
-              <h1 className="mt-12">
+            <div className="mt-12 flex items-end justify-between">
+              <h1>
                 <span className="font-mono text-xs font-medium tracking-wider text-accent uppercase">
                   {silentNight.chapter}
                 </span>
@@ -82,7 +82,8 @@ function Sidepanel(props: { onRestart: VoidFunction }) {
               </h1>
               <button
                 type="button"
-                className="mb-1 cursor-pointer text-slate-300"
+                className="mb-1 cursor-pointer rounded text-slate-300 outline-offset-4
+                  transition-colors hover:text-slate-100"
                 onClick={onRestart}
               >
                 <RotateCcw />

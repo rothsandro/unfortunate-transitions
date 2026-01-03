@@ -13,7 +13,10 @@ export function Time() {
   const Icon = isNight ? Moon : Sun;
 
   return (
-    <div className="inline-flex items-center gap-2 rounded bg-slate-800 px-3 py-2 font-mono">
+    <div
+      className="inline-flex items-center gap-2 rounded border border-slate-700/30 bg-slate-800 px-3
+        py-2 font-mono"
+    >
       <Icon size={16} /> {formatTime(virtualTime)}
     </div>
   );

@@ -30,9 +30,10 @@ function RouteComponent() {
         <div className="mt-16">
           <Link
             to="/chapters/silent-night"
-            className="rounded bg-white px-8 py-4 font-serif text-2xl text-black"
+            className="inline-block rounded-lg bg-white px-10 py-4 font-serif text-2xl text-black
+              transition-all active:scale-[0.97]"
           >
-            Play Now
+            Play Now (Beta)
           </Link>
         </div>
       </Container>
