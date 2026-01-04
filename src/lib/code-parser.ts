@@ -47,6 +47,6 @@ function cleanCode(input: string): string {
       .replace('export const ', 'const ')
 
       // Replace log messages `log('Foo "Bar"')` and `log("Foo's Bar")` with log('...')
-      .replace(/ log\((['"`])(?:\\\1|.)*?\1\)/g, " log('...')")
+      .replace(/(?<=\s|\[)log\((['"`])(?:\\\1|.)*?\1\)/g, "log('...')")
   );
 }
