@@ -29,6 +29,7 @@ function RouteComponent() {
         </p>
         <div className="mt-16">
           <Link
+            preload="render"
             to="/chapters/silent-night"
             className="inline-block rounded-lg bg-white px-10 py-4 font-serif text-2xl text-black
               transition-all active:scale-[0.97]"
