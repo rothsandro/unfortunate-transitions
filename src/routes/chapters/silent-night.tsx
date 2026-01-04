@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useActorRef, useSelector } from '@xstate/react';
-import { RefreshCcw, RotateCcw } from 'lucide-react';
+import { Info, RefreshCcw, RotateCcw } from 'lucide-react';
 import clsx from 'clsx';
 import { Pane, SplitPane } from 'react-split-pane';
 import { silentNight } from '@/chapters/silent-night';
@@ -167,15 +167,37 @@ function Drawer() {
       <Tabs defaultValue="logs">
         <TabList>
           <Tab value="logs">Occurrences</Tab>
-          <Tab value="code">Code</Tab>
+          <Tab value="source">Source</Tab>
         </TabList>
         <TabPanel value="logs">
           <silentNight.Logs />
         </TabPanel>
-        <TabPanel value="code" keepMounted>
+        <TabPanel value="source" keepMounted>
+          <SourceInfo />
           <CodeViewer code={silentNight.code} />
         </TabPanel>
       </Tabs>
+    </div>
+  );
+}
+
+function SourceInfo() {
+  return (
+    <div className="mb-8 flex items-center gap-2">
+      <Info size={16} className="shrink-0" />
+      <p className="text-sm text-slate-400">
+        <strong className="font-medium text-slate-300">For developers:</strong> This is the{' '}
+        <a
+          href="https://xstate.js.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 transition-colors hover:text-slate-300"
+        >
+          XState
+        </a>{' '}
+        actor code powering this chapter. Feel free to peek if you're stuck, or use it to learn how
+        state machines work. Non-developers can safely ignore this tab.
+      </p>
     </div>
   );
 }
