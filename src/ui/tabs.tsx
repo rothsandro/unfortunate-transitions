@@ -47,9 +47,6 @@ export function Tab(props: TabsTabProps) {
 
 export function TabPanel(props: TabsPanelProps) {
   return (
-    <BaseTabs.Panel
-      {...props}
-      className={clsx(props.className, 'h-full overflow-auto px-4 py-6')}
-    />
+    <BaseTabs.Panel {...props} className={clsx(props.className, 'h-full overflow-auto p-4')} />
   );
 }
