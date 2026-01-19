@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useActorRef, useSelector } from '@xstate/react';
 import { Info, RefreshCcw, RotateCcw } from 'lucide-react';
@@ -8,7 +9,6 @@ import { Tab, TabList, TabPanel, Tabs } from '@/ui/tabs';
 import { BackButton } from '@/ui/back-button';
 import { useSafeContext } from '@/lib/context';
 import { game } from '@/model/game-actor';
-import { Spinner } from '@/ui/spinner';
 import { SocialLinks } from '@/ui/social-links';
 import { CodeViewer } from '@/ui/code-viewer';
 
@@ -18,11 +18,9 @@ export const Route = createFileRoute('/chapters/silent-night')({
 
 function RouteComponent() {
   const gameActorRef = useActorRef(game.provide({ actors: { chapter: silentNight.machine } }));
-  const actorRef = useSelector(gameActorRef, (x) => x.children.chapter);
+  const actorRef = useSelector(gameActorRef, (x) => x.children.chapter!);
 
   const restart = () => gameActorRef.send({ type: 'reset' });
-
-  if (!actorRef) return <Spinner label="Spawning new chaos..." />;
 
   return (
     <silentNight.context value={actorRef}>
@@ -57,6 +55,12 @@ function Sidepanel(props: { onRestart: VoidFunction }) {
     hasLost: x.matches('lost'),
   }));
 
+  const [isSpinning, setIsSpinning] = useState(false);
+  const handleRestart = () => {
+    setIsSpinning(true);
+    onRestart();
+  };
+
   return (
     <div
       className={clsx(
@@ -83,9 +87,13 @@ function Sidepanel(props: { onRestart: VoidFunction }) {
                 type="button"
                 className="mb-1 cursor-pointer rounded text-slate-300 outline-offset-4
                   transition-colors hover:text-slate-100"
-                onClick={onRestart}
+                onClick={handleRestart}
+                title="Restart Chapter"
               >
-                <RotateCcw />
+                <RotateCcw
+                  className={isSpinning ? 'animate-[spin_0.35s_ease-out_reverse]' : ''}
+                  onAnimationEnd={() => setIsSpinning(false)}
+                />
                 <span className="sr-only">Restart Chapter</span>
               </button>
             </div>
