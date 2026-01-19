@@ -34,7 +34,7 @@ function RouteComponent() {
             className="inline-block rounded-lg bg-white px-10 py-4 font-serif text-2xl text-black
               transition-all active:scale-[0.97]"
           >
-            Play Now (Beta)
+            Play Now
           </Link>
         </div>
       </Container>
